@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SheetGram</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #fafafa;
+        }
+        
+        /* Auth Screen */
+        .auth-container {
+            max-width: 350px;
+            margin: 50px auto;
+            padding: 40px;
+            background: white;
+            border: 1px solid #dbdbdb;
+            border-radius: 1px;
+            text-align: center;
+        }
+        
+        .logo {
+            font-family: 'Brush Script MT', cursive;
+            font-size: 50px;
+            margin-bottom: 30px;
+            color: #262626;
+        }
+        
+        input {
+            width: 100%;
+            padding: 9px 8px;
+            margin: 5px 0;
+            background: #fafafa;
+            border: 1px solid #dbdbdb;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        
+        button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background: #0095f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #0077c2;
+        }
+        
+        button:disabled {
+            background: #b2dffc;
+            cursor: not-allowed;
+        }
+        
+        .switch-auth {
+            color: #0095f6;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        
+        .error-msg {
+            color: #ed4956;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+        
+        /* Main App */
+        .app {
+            display: none;
+            max-width: 935px;
+            margin: 0 auto;
+        }
+        
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: white;
+            border-bottom: 1px solid #dbdbdb;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            max-width: 935px;
+        }
+        
+        .nav-logo {
+            font-family: 'Brush Script MT', cursive;
+            font-size: 30px;
+            color: #262626;
+        }
+        
+        .nav-icons {
+            display: flex;
+            gap: 20px;
+            font-size: 22px;
+            cursor: pointer;
+        }
+        
+        .nav-icons span:hover {
+            opacity: 0.7;
+        }
+        
+        .feed {
+            margin-top: 80px;
+            max-width: 470px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .post {
+            background: white;
+            border: 1px solid #dbdbdb;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .post-header {
+            display: flex;
+            align-items: center;
+            padding: 14px;
+            gap: 10px;
+        }
+        
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .username {
+            font-weight: 600;
+            font-size: 14px;
+            color: #262626;
+        }
+        
+        .post-image {
+            width: 100%;
+            display: block;
+            max-height: 600px;
+            object-fit: cover;
+        }
+        
+        .post-actions {
+            padding: 12px 16px 8px;
+            display: flex;
+            gap: 16px;
+        }
+        
+        .action-btn {
+            font-size: 24px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            width: auto;
+            padding: 0;
+        }
+        
+        .action-btn:hover {
+            opacity: 0.6;
+        }
+        
+        .post-likes {
+            font-weight: 600;
+            padding: 0 16px 8px;
+            font-size: 14px;
+        }
+        
+        .post-caption {
+            padding: 0 16px 16px;
+            font-size: 14px;
+        }
+        
+        .post-caption strong {
+            margin-right: 6px;
+        }
+        
+        .post-time {
+            padding: 0 16px 16px;
+            color: #8e8e8e;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+        
+        /* Create Post Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .modal-content h3 {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        
+        .preview-img {
+            max-width: 100%;
+            max-height: 300px;
+            margin: 10px 0;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        textarea {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #dbdbdb;
+            border-radius: 3px;
+            resize: none;
+            font-family: inherit;
+        }
+        
+        .btn-secondary {
+            background: #efefef;
+            color: #262626;
+        }
+        
+        .btn-secondary:hover {
+            background: #dbdbdb;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8e8e8e;
+        }
+        
+        .empty-state h3 {
+            color: #262626;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Auth Screen -->
+<div class="auth-container" id="authScreen">
+    <div class="logo">SheetGram</div>
+    <div id="errorMsg" class="error-msg"></div>
+    
+    <div id="loginForm">
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="login()" id="loginBtn">Log In</button>
+        <p class="switch-auth" onclick="toggleAuth()">Don't have an account? Sign up</p>
+    </div>
+    
+    <div id="signupForm" style="display:none;">
+        <input type="text" id="newUsername" placeholder="Username">
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="newPassword" placeholder="Password">
+        <button onclick="signup()" id="signupBtn">Sign Up</button>
+        <p class="switch-auth" onclick="toggleAuth()">Already have an account? Log in</p>
+    </div>
+</div>
+
+<!-- Main App -->
+<div class="app" id="mainApp">
+    <div class="navbar">
+        <div class="nav-logo">SheetGram</div>
+        <div class="nav-icons">
+            <span onclick="loadFeed()" title="Home">🏠</span>
+            <span onclick="openCreateModal()" title="New Post">➕</span>
+            <span onclick="logout()" title="Logout">🚪</span>
+        </div>
+    </div>
+    
+    <div class="feed" id="feed">
+        <div class="loading"></div>
+    </div>
+</div>
+
+<!-- Create Post Modal -->
+<div class="modal" id="createModal" onclick="closeModalOnOutside(event)">
+    <div class="modal-content">
+        <h3>Create New Post</h3>
+        <input type="url" id="imageUrl" placeholder="Paste image URL (https://...)" oninput="previewImage()">
+        <img id="preview" class="preview-img">
+        <textarea id="caption" placeholder="Write a caption..." rows="3"></textarea>
+        <button onclick="createPost()" id="postBtn">Share</button>
+        <button onclick="closeModal()" class="btn-secondary">Cancel</button>
+    </div>
+</div>
+
+<script>
+// 🔴 IMPORTANT: Your API URL
+const API_URL = 'https://script.google.com/macros/s/AKfycbw7wbMYyAjgP6BJoLHMJGkKS2GyABil7MQ9hAMORr149GASSAAE_8VcpZlP0uEC_O01uA/exec';
+
+let currentUser = null;
+let authToken = localStorage.getItem('sheetgram_token');
+
+// Check existing session on load
+if(authToken) {
+    checkSession();
+}
+
+function toggleAuth() {
+    document.getElementById('loginForm').style.display = 
+        document.getElementById('loginForm').style.display === 'none' ? 'block' : 'none';
+    document.getElementById('signupForm').style.display = 
+        document.getElementById('signupForm').style.display === 'none' ? 'block' : 'none';
+    document.getElementById('errorMsg').textContent = '';
+}
+
+function showError(msg) {
+    document.getElementById('errorMsg').textContent = msg;
+}
+
+function setLoading(btnId, loading) {
+    const btn = document.getElementById(btnId);
+    btn.disabled = loading;
+    btn.textContent = loading ? 'Please wait...' : (btnId === 'loginBtn' ? 'Log In' : 'Sign Up');
+}
+
+async function signup() {
+    const username = document.getElementById('newUsername').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('newPassword').value;
+    
+    if(!username || !email || !password) {
+        showError('Please fill all fields');
+        return;
+    }
+    
+    setLoading('signupBtn', true);
+    
+    try {
+        const response = await fetch(`${API_URL}?action=signup`, {
+            method: 'POST',
+            body: JSON.stringify({ username, email, password })
+        });
+        const data = await response.json();
+        
+        if(data.success) {
+            showError('');
+            alert('Account created! Please log in.');
+            toggleAuth();
+        } else {
+            showError(data.error || 'Signup failed');
+        }
+    } catch(e) {
+        showError('Network error. Please try again.');
+    } finally {
+        setLoading('signupBtn', false);
+    }
+}
+
+async function login() {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    
+    if(!username || !password) {
+        showError('Please enter username and password');
+        return;
+    }
+    
+    setLoading('loginBtn', true);
+    
+    try {
+        const response = await fetch(`${API_URL}?action=login`, {
+            method: 'POST',
+            body: JSON.stringify({ username, password })
+        });
+        const data = await response.json();
+        
+        if(data.success) {
+            localStorage.setItem('sheetgram_token', data.token);
+            localStorage.setItem('sheetgram_user', JSON.stringify({
+                userId: data.userId,
+                username: data.username
+            }));
+            showApp();
+        } else {
+            showError(data.error || 'Login failed');
+        }
+    } catch(e) {
+        showError('Network error. Please try again.');
+    } finally {
+        setLoading('loginBtn', false);
+    }
+}
+
+async function checkSession() {
+    try {
+        const response = await fetch(`${API_URL}?action=checkSession&token=${authToken}`);
+        const data = await response.json();
+        if(data.valid) {
+            showApp();
+        } else {
+            localStorage.removeItem('sheetgram_token');
+            localStorage.removeItem('sheetgram_user');
+        }
+    } catch(e) {
+        console.error('Session check failed');
+    }
+}
+
+function showApp() {
+    document.getElementById('authScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    currentUser = JSON.parse(localStorage.getItem('sheetgram_user'));
+    loadFeed();
+}
+
+async function loadFeed() {
+    const feed = document.getElementById('feed');
+    feed.innerHTML = '<div class="loading"></div>';
+    
+    try {
+        const response = await fetch(`${API_URL}?action=getPosts`);
+        const data = await response.json();
+        
+        if(data.success) {
+            if(data.posts.length === 0) {
+                feed.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No posts yet</h3>
+                        <p>Be the first to share something!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            feed.innerHTML = '';
+            data.posts.forEach(post => {
+                const timeAgo = getTimeAgo(post.timestamp);
+                feed.innerHTML += `
+                    <div class="post">
+                        <div class="post-header">
+                            <div class="avatar">${post.username.charAt(0).toUpperCase()}</div>
+                            <span class="username">${escapeHtml(post.username)}</span>
+                        </div>
+                        <img src="${escapeHtml(post.imageUrl.trim())}" 
+                             class="post-image" 
+                             onerror="this.src='https://via.placeholder.com/470x470?text=Image+Not+Found'"
+                             onload="this.style.display='block'"
+                             style="display:none;">
+                        <div class="post-actions">
+                            <button class="action-btn">❤️</button>
+                            <button class="action-btn">💬</button>
+                            <button class="action-btn">📤</button>
+                        </div>
+                        <div class="post-likes">Liked by you and others</div>
+                        <div class="post-caption">
+                            <strong>${escapeHtml(post.username)}</strong>
+                            ${escapeHtml(post.caption)}
+                        </div>
+                        <div class="post-time">${timeAgo}</div>
+                    </div>
+                `;
+            });
+        }
+    } catch(e) {
+        feed.innerHTML = '<div class="empty-state"><h3>Error loading feed</h3><p>Please refresh</p></div>';
+    }
+}
+
+function openCreateModal() {
+    document.getElementById('createModal').style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('createModal').style.display = 'none';
+    document.getElementById('imageUrl').value = '';
+    document.getElementById('preview').style.display = 'none';
+    document.getElementById('caption').value = '';
+}
+
+function closeModalOnOutside(event) {
+    if(event.target.id === 'createModal') {
+        closeModal();
+    }
+}
+
+function previewImage() {
+    const url = document.getElementById('imageUrl').value.trim();
+    const preview = document.getElementById('preview');
+    if(url) {
+        preview.src = url;
+        preview.style.display = 'block';
+        preview.onerror = () => {
+            preview.style.display = 'none';
+        };
+    } else {
+        preview.style.display = 'none';
+    }
+}
+
+async function createPost() {
+    const imageUrl = document.getElementById('imageUrl').value.trim();
+    const caption = document.getElementById('caption').value.trim();
+    const token = localStorage.getItem('sheetgram_token');
+    const btn = document.getElementById('postBtn');
+    
+    if(!imageUrl) {
+        alert('Please enter an image URL');
+        return;
+    }
+    
+    if(!imageUrl.startsWith('http')) {
+        alert('Please enter a valid URL starting with http:// or https://');
+        return;
+    }
+    
+    btn.disabled = true;
+    btn.textContent = 'Sharing...';
+    
+    try {
+        const response = await fetch(`${API_URL}?action=createPost`, {
+            method: 'POST',
+            body: JSON.stringify({ token, imageUrl, caption })
+        });
+        const data = await response.json();
+        
+        if(data.success) {
+            closeModal();
+            loadFeed();
+        } else {
+            alert(data.error || 'Failed to create post');
+        }
+    } catch(e) {
+        alert('Network error. Please try again.');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Share';
+    }
+}
+
+function logout() {
+    localStorage.removeItem('sheetgram_token');
+    localStorage.removeItem('sheetgram_user');
+    location.reload();
+}
+
+function escapeHtml(text) {
+    if(!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function getTimeAgo(timestamp) {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const seconds = Math.floor((now - date) / 1000);
+    
+    let interval = seconds / 31536000;
+    if(interval > 1) return Math.floor(interval) + ' years ago';
+    interval = seconds / 2592000;
+    if(interval > 1) return Math.floor(interval) + ' months ago';
+    interval = seconds / 86400;
+    if(interval > 1) return Math.floor(interval) + ' days ago';
+    interval = seconds / 3600;
+    if(interval > 1) return Math.floor(interval) + ' hours ago';
+    interval = seconds / 60;
+    if(interval > 1) return Math.floor(interval) + ' minutes ago';
+    return 'Just now';
+}
+</script>
+
+</body>
+</html>
